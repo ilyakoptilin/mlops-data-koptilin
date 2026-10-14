@@ -12,7 +12,7 @@
 
 Версии зафиксированы в `pyproject.toml` / `poetry.lock`.
 
-Git-репозиторий: `<ВСТАВИТЬ ССЫЛКУ НА РЕПОЗИТОРИЙ>`
+Git-репозиторий: `https://github.com/ilyakoptilin/mlops-data-koptilin`
 
 ## 2. DVC
 
@@ -63,12 +63,80 @@ SHA-256 файла `data.dvc` (итоговый, `main`): `c7f33951d287ba426e1fb
 
 ## 3. ClearML Dataset
 
-Project: `MIIT/MLOps/practice_3/<фамилия>`, dataset name: `sklearn-tabular-<фамилия>`.
+ClearML-сервер: ClearML Cloud (app.clear.ml, API: https://api.clear.ml).
 
-Блок ниже заполняется автоматически командой `python clearml_datasets.py --surname <фамилия> verify`.
+Project: `MIIT/MLOps/practice_3/koptilin`, dataset name: `sklearn-tabular-koptilin`.
+
+Блок ниже заполняется автоматически командой `python clearml_datasets.py --surname koptilin verify`.
 
 <!-- CLEARML:BEGIN -->
-_Будет заполнено после запуска `verify`: Dataset IDs (`BASE_ID`, `WINE_ID`, `IRIS_FEATURES_ID`), parent IDs, файлы, added/modified/removed, SHA-256, формы таблиц и dependency graph._
+#### BASE_ID - version 1.0.0
+
+- Dataset ID: `734e3915b7f64b5aa2406892c9bc7b19` (status: completed, tags: ['base'])
+- parent IDs: none
+- files: ['iris.csv']
+- added: ['iris.csv']; modified: []; removed: []
+- downloaded to: `clearml_downloads/1.0.0/`
+
+| file | SHA-256 | shape | columns |
+|---|---|---|---|
+| iris.csv | `7d8c276f781bd47bc4abb6c9354cf6262f6d511bacb98cd445c4b8ebee86b5f7` | (150, 5) | ['sepal length (cm)', 'sepal width (cm)', 'petal length (cm)', 'petal width (cm)', 'target'] |
+
+#### WINE_ID - version 1.1.0
+
+- Dataset ID: `998f9aad4e5245509a421e596a01ebeb` (status: completed, tags: ['wine'])
+- parent IDs: ['734e3915b7f64b5aa2406892c9bc7b19']
+- files: ['iris.csv', 'wine.csv']
+- added: ['wine.csv']; modified: []; removed: []
+- downloaded to: `clearml_downloads/1.1.0/`
+
+| file | SHA-256 | shape | columns |
+|---|---|---|---|
+| iris.csv | `7d8c276f781bd47bc4abb6c9354cf6262f6d511bacb98cd445c4b8ebee86b5f7` | (150, 5) | ['sepal length (cm)', 'sepal width (cm)', 'petal length (cm)', 'petal width (cm)', 'target'] |
+| wine.csv | `724d80b05e39c7a72fe7631de59583c764049137f9d7089b01b5460e212c75c0` | (178, 14) | ['alcohol', 'malic_acid', 'ash', 'alcalinity_of_ash', 'magnesium', 'total_phenols', 'flavanoids', 'nonflavanoid_phenols', 'proanthocyanins', 'color_intensity', 'hue', 'od280/od315_of_diluted_wines', 'proline', 'target'] |
+
+#### IRIS_FEATURES_ID - version 2.0.0
+
+- Dataset ID: `4da2988517d846fa9e02575c6c2ea56b` (status: completed, tags: ['iris-features'])
+- parent IDs: ['734e3915b7f64b5aa2406892c9bc7b19']
+- files: ['iris.csv']
+- added: []; modified: ['iris.csv']; removed: []
+- downloaded to: `clearml_downloads/2.0.0/`
+
+| file | SHA-256 | shape | columns |
+|---|---|---|---|
+| iris.csv | `c7b705193386ac43f2ae64d66952aea19bd11d1d26f5f1f6559e096ae2917911` | (150, 7) | ['sepal length (cm)', 'sepal width (cm)', 'petal length (cm)', 'petal width (cm)', 'target', 'sepal_area', 'petal_area'] |
+
+#### Dependency graph (`get_dependency_graph()` of 2.0.0 and 1.1.0)
+
+```json
+{
+  "2.0.0": {
+    "4da2988517d846fa9e02575c6c2ea56b": [
+      "734e3915b7f64b5aa2406892c9bc7b19"
+    ]
+  },
+  "1.1.0": {
+    "734e3915b7f64b5aa2406892c9bc7b19": [],
+    "998f9aad4e5245509a421e596a01ebeb": [
+      "734e3915b7f64b5aa2406892c9bc7b19"
+    ]
+  }
+}
+```
+
+#### Automatic checks
+
+- [x] 1.1.0 parent == BASE_ID
+- [x] 2.0.0 parent == BASE_ID
+- [x] WINE_ID is NOT an ancestor of 2.0.0
+- [x] 1.0.0 contains only iris.csv
+- [x] 1.1.0 contains iris.csv + wine.csv
+- [x] 1.1.0 added == [wine.csv]
+- [x] 2.0.0 contains only iris.csv
+- [x] 2.0.0 modified == [iris.csv]
+- [x] iris.csv in 1.0.0 and 1.1.0 identical
+- [x] iris.csv in 2.0.0 differs from base
 <!-- CLEARML:END -->
 
 ## 4. Сравнительная таблица
