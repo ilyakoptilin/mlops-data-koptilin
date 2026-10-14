@@ -2,3 +2,6 @@
 __pycache__/
 poetry.toml
 /data
+clearml_staging/
+clearml_downloads/
+clearml_ids.json
