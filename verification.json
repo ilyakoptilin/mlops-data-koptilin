@@ -1,0 +1,49 @@
+{
+  "mlflow_tracking_uri": "sqlite:///mlflow.db",
+  "experiment_id": "1",
+  "experiment_name": "miit-mlops-practice-4-koptilin",
+  "session_id": "85bd691ef54a",
+  "dataset_id": "998f9aad4e5245509a421e596a01ebeb",
+  "wine_sha256": "724d80b05e39c7a72fe7631de59583c764049137f9d7089b01b5460e212c75c0",
+  "split": {
+    "train_rows": 106,
+    "validation_rows": 36,
+    "test_rows": 36,
+    "random_state": 42,
+    "stratified": true
+  },
+  "best_run_id": "51bdbc4748444b168ffdc56d8af718fa",
+  "best_run_name": "rf-n200-depthNone",
+  "best_model_family": "random_forest",
+  "best_params": {
+    "model_type": "RandomForestClassifier",
+    "n_estimators": 200,
+    "max_depth": "None",
+    "min_samples_split": 2,
+    "random_state": 42
+  },
+  "validation_metrics": {
+    "accuracy": 0.9722222222222222,
+    "precision_weighted": 0.9747474747474748,
+    "recall_weighted": 0.9722222222222222,
+    "f1_weighted": 0.9723691945914168,
+    "training_time": 0.0879971670001396
+  },
+  "test_metrics": {
+    "accuracy": 0.9444444444444444,
+    "precision_weighted": 0.949106449106449,
+    "recall_weighted": 0.9444444444444444,
+    "f1_weighted": 0.9435246235246235
+  },
+  "checks": {
+    "accepts_dataframe_with_columns": true,
+    "predictions_match": true,
+    "signature_present": true,
+    "params_complete": true,
+    "metrics_complete": true,
+    "tags_complete": true,
+    "model_artifact_present": true
+  },
+  "clearml_task_id": "3f6e8c8dafbf4400839ca9713e9df1eb",
+  "clearml_model_id": "ac3abdd5fe6b4c95a64461146bb8f748"
+}
