@@ -5,3 +5,10 @@ poetry.toml
 clearml_staging/
 clearml_downloads/
 clearml_ids.json
+.DS_Store
+mlflow.db
+mlruns/
+mlartifacts/
+artifacts/
+mlflow_server.db
+mlartifacts_server/

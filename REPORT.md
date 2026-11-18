@@ -169,3 +169,57 @@ Project: `MIIT/MLOps/practice_3/koptilin`, dataset name: `sklearn-tabular-koptil
 6. **Что произойдёт, если после `git switch` не выполнить DVC checkout?** Git переключит `data.dvc`, но файлы в `data/` останутся от предыдущей версии. В работе после `git switch main` в `data/` остались `iris.csv` и `wine.csv` из `feature/wine`, хотя `data.dvc` уже указывал на базу; `dvc status` показал `modified: data`. Если не заметить, можно обучить модель на данных не той версии или закоммитить неверное состояние. После `dvc checkout` остался только базовый `iris.csv`.
 
 7. **В каком сценарии удобнее DVC, а в каком ClearML Dataset?** DVC удобнее, когда данные должны жить вместе с кодом и ветками: ветки `feature/wine` / `feature/iris-features` и их слияние сделаны обычным Git-процессом, а версия данных воспроизводится по коммиту или тегу. ClearML удобнее, когда версию нужно отдать другой машине или эксперименту по одному ID, видеть lineage в UI и создавать дочерние версии, не перезаливая неизменённые файлы (в `1.1.0` загружен только `wine.csv`).
+
+## 6. Эксперименты
+
+### 6.1. Окружение и исходные данные
+
+- **Версии ПО:** Python `3.12.15`, MLflow `3.18.0`, ClearML `1.18.0`, scikit-learn `1.9.1`, pandas `3.0.6`.
+- **ClearML Dataset ID (Wine `1.1.0`):** `998f9aad4e5245509a421e596a01ebeb`
+- **SHA-256 файла `wine.csv`:** `724d80b05e39c7a72fe7631de59583c764049137f9d7089b01b5460e212c75c0` (проверяется перед обучением; при несовпадении запуск завершается с ошибкой).
+- **Схема split:** стратифицированное разбиение по `target` в пропорции **60% / 20% / 20%** (`random_state = 42`): `train` — 106 строк, `validation` — 36 строк, `test` — 36 строк (изолирован, используется однократно).
+
+### 6.2. Идентификаторы MLflow и ClearML
+
+- **MLflow Tracking URI:** `sqlite:///mlflow.db` (или `http://127.0.0.1:8080` при запуске Tracking Server)
+- **MLflow Experiment:** `miit-mlops-practice-4-koptilin` (ID: `1`)
+- **Лучший MLflow Run ID:** `51bdbc4748444b168ffdc56d8af718fa` (`rf-n200-depthNone`)
+- **ClearML Project / Task:** `MIIT/MLOps/practice_4/koptilin` / `wine-best-model`
+- **ClearML Task ID:** `3f6e8c8dafbf4400839ca9713e9df1eb`
+- **ClearML Model ID (`OutputModel`, Published):** `ac3abdd5fe6b4c95a64461146bb8f748`
+
+### 6.3. Таблица сравнения запусков (validation)
+
+| run ID | Run Name | model family | основные параметры | validation F1 | training time (s) |
+|---|---|---|---|---:|---:|
+| `51bdbc4748444b168ffdc56d8af718fa` | `rf-n200-depthNone` | `random_forest` | n_estimators=200, max_depth=None, min_samples_split=2, random_state=42 | **0.9724** | 0.0880 |
+| `db42a55a460741e79bcc9785880f5f5d` | `rf-n50-depth2` | `random_forest` | n_estimators=50, max_depth=2, min_samples_split=5, random_state=42 | **0.9448** | 0.0246 |
+| `4957244f30ad4fba877a94eea526784d` | `rf-n100-depth4` | `random_forest` | n_estimators=100, max_depth=4, min_samples_split=2, random_state=42 | **0.9448** | 0.0456 |
+| `5dc3d0a66a1f484091fab4ea302b738e` | `logreg-c0.1-newton-cg` | `logistic_regression` | C=0.1, solver=newton-cg, max_iter=1000, random_state=42 | **0.9435** | 0.0036 |
+| `97ff837a66ce463b86931f93c542f412` | `logreg-c1.0-saga` | `logistic_regression` | C=1.0, solver=saga, max_iter=2000, random_state=42 | **0.9435** | 0.0046 |
+| `44460b6ea6d540cd91f2dd6833d95259` | `logreg-c0.01-lbfgs` | `logistic_regression` | C=0.01, solver=lbfgs, max_iter=1000, random_state=42 | **0.9158** | 0.0087 |
+
+### 6.4. Выбор лучшей модели и анализ времени обучения
+
+- **Обоснование выбора:** по метрике `f1_weighted` на `validation` лучшей стала модель **`rf-n200-depthNone`** (`RandomForestClassifier`: `n_estimators=200`, `max_depth=None`, `min_samples_split=2`, `random_state=42`) с результатом `validation f1_weighted = 0.9724` (`accuracy = 0.9722`).
+- **Время обучения и качество:** линейные модели (`Pipeline(StandardScaler + LogisticRegression)`) обучаются быстрее (в среднем `0.0056` с, лучший `validation f1_weighted = 0.9435`), тогда как ансамбль деревьев (`RandomForestClassifier`) требует в среднем `0.0527` с, но обеспечивает более высокое качество (`validation f1_weighted = 0.9724`) при малом абсолютном времени обучения (< 0.1 с).
+
+### 6.5. Проверка модели и test-метрики
+
+Модель загружена по URI `runs:/51bdbc4748444b168ffdc56d8af718fa/model`; наличие `signature` и совпадение предсказаний подтверждены (`predictions_match = true`, отчёт сохранён в `verification.json` и прикреплён как артефакт).
+
+| Метрика | `validation` | `test` |
+|---|---:|---:|
+| `accuracy` | 0.9722 | **0.9444** |
+| `precision_weighted` | 0.9747 | **0.9491** |
+| `recall_weighted` | 0.9722 | **0.9444** |
+| `f1_weighted` | 0.9724 | **0.9435** |
+
+### 6.6. Запуск в чистом окружении
+
+```bash
+poetry install
+poetry run mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlartifacts --host 127.0.0.1 --port 8080
+poetry run python run_experiments.py --tracking-uri http://127.0.0.1:8080 --dataset-id 998f9aad4e5245509a421e596a01ebeb --expected-sha256 724d80b05e39c7a72fe7631de59583c764049137f9d7089b01b5460e212c75c0
+poetry run pytest -v
+```
